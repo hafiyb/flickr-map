@@ -2,7 +2,9 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   brands: [],
+  selectedBrands: [],
   models: [],
+  selectedModels: []
 };
 
 export const cameraSlice = createSlice({
@@ -12,12 +14,15 @@ export const cameraSlice = createSlice({
     setBrands: (state, { payload }) => {
       state.brands = payload;
     },
+    setSelectedBrands: (state, {payload}) => {
+      state.selectedBrands = payload
+    },
     setModels: (state, { payload }) => {
       state.models = payload;
     },
   },
 });
 
-export const { setBrands, setModels } = cameraSlice.actions;
+export const { setBrands, setSelectedBrands, setModels } = cameraSlice.actions;
 
 export default cameraSlice

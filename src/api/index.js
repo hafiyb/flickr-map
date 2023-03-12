@@ -21,11 +21,11 @@ export const flickrApi = createApi({
       },
     }),
     getModels: builder.query({
-      query: () => {
+      query: (brand) => {
         let formData = new FormData();
         formData.append('api_key', key);
         formData.append('method', 'flickr.cameras.getBrandModels');
-        formData.append('brand', 'apple');
+        formData.append('brand', brand);
         formData.append('format', 'json');
         formData.append('nojsoncallback', '1');
         return {
@@ -34,15 +34,36 @@ export const flickrApi = createApi({
         };
       },
     }),
+    getPhotos: builder.query({
+      query: () => {
+        let formData = new FormData()
+        formData.append('api_key', key);
+        formData.append('method', 'flickr.photos.search');
+        formData.append('media', 'photos');
+        formData.append('privacy_filter', '1');
+        formData.append('tags', 'sony/dsc-w290/, apple/iphone_11');
+        formData.append('has_geo', '1');
+        formData.append('accuracy', '11');
+        formData.append('extras', 'geo');
+        formData.append('format', 'json');
+        formData.append('nojsoncallback', '1');
+
+        return{
+          method: 'POST',
+          body: formData
+        }
+      }
+    }),
   }),
 });
 
-// flickrApi.enhanceEndpoints
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
 export const {
   useGetPokemonByNameQuery,
   useGetBrandsQuery,
-  useLazyGetModelsQuery
+  useLazyGetModelsQuery,
+  useLazyGetPhotosQuery,
+  useLazyGetPhotoLocationQuery,
 } = flickrApi;

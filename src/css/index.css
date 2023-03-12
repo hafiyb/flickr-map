@@ -1,0 +1,49 @@
+@import 'bootstrap/dist/css/bootstrap.css';
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.App {
+  width: 100vw;
+  height: 100vh;
+}
+
+.container {
+  background-color: #16161d;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.list-container {
+  height: 100vh;
+  width: 30%;
+  background-color: yellow;
+}
+
+.map-container {
+  height: 100vh;
+  width: 70%;
+  background-color: white;
+}
+
+.list-container-search {
+  background-color: red;
+  display: "flex";
+  flex-direction: column;
+  padding: 14px;
+}
+
+.dropdown-menu {
+  max-height: 500px;
+  width: 100%;
+  overflow: auto;
+}
+
+.btn {
+  width: 100%;
+  margin-top: 0.75rem;
+}
