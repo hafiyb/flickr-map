@@ -11,6 +11,8 @@ import GoogleMapReact from 'google-map-react';
 import { Button, DropdownButton } from 'react-bootstrap';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 
+const googleKey = process.env.REACT_APP_GOOGLEMAPS_API_KEY;
+
 const App = () => {
   const dispatch = useDispatch();
   const brands = useSelector((state) => state.camera.brands, shallowEqual);
@@ -103,7 +105,7 @@ const App = () => {
         <div class={'map-container'}>
           <GoogleMapReact
             bootstrapURLKeys={{
-              key: 'AIzaSyBY_2C0McheyhtxI5rZI-c8eH1ea_XIc1w',
+              key: googleKey,
             }}
             defaultCenter={defaultProps.center}
             defaultZoom={defaultProps.zoom}
