@@ -45,6 +45,8 @@ export const flickrApi = createApi({
         formData.append('has_geo', '1');
         formData.append('accuracy', '11');
         formData.append('extras', 'geo');
+        formData.append('per_page', '10');
+        formData.append('page', '1');
         formData.append('format', 'json');
         formData.append('nojsoncallback', '1');
 

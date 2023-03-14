@@ -7,6 +7,7 @@ import {
 import { useEffect } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
+  clearModels,
   setBrands,
   setModels,
   setPhotos,
@@ -16,6 +17,7 @@ import {
 import GoogleMapReact from 'google-map-react';
 import { Button, DropdownButton } from 'react-bootstrap';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import PhotoListItem from './components/photoListItem';
 
 const googleKey = process.env.REACT_APP_GOOGLEMAPS_API_KEY;
 
@@ -23,6 +25,10 @@ const App = () => {
   const dispatch = useDispatch();
   const brands = useSelector((state) => state.camera.brands, shallowEqual);
   const models = useSelector((state) => state.camera.models, shallowEqual);
+  const fetchedModelBrands = useSelector(
+    (state) => state.camera.fetchedModelBrands,
+    shallowEqual
+  );
   const photos = useSelector((state) => state.camera.photos, shallowEqual);
   const selectedBrands = useSelector(
     (state) => state.camera.selectedBrands,
@@ -33,11 +39,15 @@ const App = () => {
     shallowEqual
   );
 
-  const { data: getBrandsData, error, isLoading } = useGetBrandsQuery();
-  const [triggerGetModelsQuery, { data: getModelsData }] =
-    useLazyGetModelsQuery();
-  const [triggerGetPhotosQuery, { data: getPhotosData }] =
-    useLazyGetPhotosQuery();
+  const { data: getBrandsData } = useGetBrandsQuery();
+  const [
+    triggerGetModelsQuery,
+    { data: getModelsData, loading: loadingModelsData },
+  ] = useLazyGetModelsQuery();
+  const [
+    triggerGetPhotosQuery,
+    { data: getPhotosData, loading: loadingPhotosData },
+  ] = useLazyGetPhotosQuery();
 
   useEffect(() => {
     if (getBrandsData && getBrandsData.stat === 'ok') {
@@ -50,6 +60,18 @@ const App = () => {
       dispatch(setModels([getModelsData.cameras]));
     }
   }, [getModelsData]);
+
+  useEffect(() => {
+    console.log(fetchedModelBrands);
+    console.log(selectedBrands);
+    selectedBrands.forEach((item) => {
+      console.log(fetchedModelBrands.indexOf(item));
+      if (!fetchedModelBrands.includes(item)) {
+        console.log(item, 'IS NOT FOUND');
+        triggerGetModelsQuery(item);
+      }
+    });
+  }, [fetchedModelBrands, selectedBrands]);
 
   useEffect(() => {
     if (getPhotosData && getPhotosData.stat === 'ok') {
@@ -86,21 +108,17 @@ const App = () => {
     } else dispatch(setSelectedModels([...selectedModels, e]));
   };
 
-  const handleSearchModel = (e) => {
-    if (!e) {
-      selectedBrands.forEach((item) => {
-        triggerGetModelsQuery(item);
-      });
-    }
-  };
+  useEffect(() => {
+    dispatch(clearModels());
+  }, [selectedBrands]);
 
   const handleSearchPhotos = (e) => {
-    triggerGetPhotosQuery(e)
+    triggerGetPhotosQuery(e);
   };
 
   return (
     <div class={'App'}>
-      <div class={'container'}>
+      <div class={'app-container'}>
         <div class={'list-container'}>
           <div class={'list-container-search'}>
             <h3>flickr-map</h3>
@@ -109,7 +127,6 @@ const App = () => {
               title='Select Brands'
               autoClose={false}
               onSelect={(e) => handleSelectBrand(e)}
-              onToggle={(e) => handleSearchModel(e)}
             >
               {brands?.map((item, i) => {
                 return (
@@ -129,31 +146,34 @@ const App = () => {
               autoClose={false}
               disabled={!selectedBrands.length}
               onSelect={(e) => handleSelectModel(e)}
-              onToggle={(e) => handleSearchModel(e)}
             >
-              {models?.map((brand, i) => {
-                return (
-                  <>
-                    <DropdownItem key={i} disabled>
-                      {brand.brand}
-                    </DropdownItem>
-                    <div class='dropdown-divider'></div>
-                    {brand.camera.map((item, i) => {
-                      return (
-                        <DropdownItem
-                          key={i}
-                          eventKey={`${brand.brand}/${item.id}`}
-                          active={selectedModels.includes(
-                            `${brand.brand}/${item.id}`
-                          )}
-                        >
-                          {item.name._content}
-                        </DropdownItem>
-                      );
-                    })}
-                  </>
-                );
-              })}
+              {!loadingModelsData ? (
+                models?.map((brand, i) => {
+                  return (
+                    <>
+                      <DropdownItem key={i} disabled>
+                        {brand.brand}
+                      </DropdownItem>
+                      <div class='dropdown-divider'></div>
+                      {brand.camera.map((item, i) => {
+                        return (
+                          <DropdownItem
+                            key={i}
+                            eventKey={`${brand.brand}/${item.id}`}
+                            active={selectedModels.includes(
+                              `${brand.brand}/${item.id}`
+                            )}
+                          >
+                            {item.name._content}
+                          </DropdownItem>
+                        );
+                      })}
+                    </>
+                  );
+                })
+              ) : (
+                <DropdownItem>loading...</DropdownItem>
+              )}
             </DropdownButton>
             <Button
               disabled={!selectedBrands.length || !selectedModels.length}
@@ -163,7 +183,13 @@ const App = () => {
             </Button>
           </div>
           <div class={'list-container-photos'}>
-              <h1>test</h1>
+            {!loadingPhotosData ? (
+              photos.map((item, i) => {
+                return <PhotoListItem props={item}>i</PhotoListItem>;
+              })
+            ) : (
+              <p>loading...</p>
+            )}
           </div>
         </div>
         <div class={'map-container'}>
