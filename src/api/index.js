@@ -35,13 +35,13 @@ export const flickrApi = createApi({
       },
     }),
     getPhotos: builder.query({
-      query: () => {
+      query: (model) => {
         let formData = new FormData()
         formData.append('api_key', key);
         formData.append('method', 'flickr.photos.search');
         formData.append('media', 'photos');
         formData.append('privacy_filter', '1');
-        formData.append('tags', 'sony/dsc-w290/, apple/iphone_11');
+        formData.append('tags', model.toString());
         formData.append('has_geo', '1');
         formData.append('accuracy', '11');
         formData.append('extras', 'geo');

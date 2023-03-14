@@ -32,9 +32,15 @@
 
 .list-container-search {
   background-color: red;
-  display: "flex";
+  display: flex;
   flex-direction: column;
   padding: 14px;
+}
+
+.list-container-photos {
+  background-color: green;
+  width: 100%;
+  height: auto;
 }
 
 .dropdown-menu {
@@ -46,4 +52,10 @@
 .btn {
   width: 100%;
   margin-top: 0.75rem;
+}
+
+.photo-list-item-container {
+  width: 100%;
+  background-color: blue;
+  height: 100px;
 }

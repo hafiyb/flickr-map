@@ -4,7 +4,8 @@ const initialState = {
   brands: [],
   selectedBrands: [],
   models: [],
-  selectedModels: []
+  selectedModels: [],
+  photos: []
 };
 
 export const cameraSlice = createSlice({
@@ -20,9 +21,15 @@ export const cameraSlice = createSlice({
     setModels: (state, { payload }) => {
       state.models = payload;
     },
+    setSelectedModels: (state, {payload}) => {
+      state.selectedModels = payload
+    },
+    setPhotos: (state, {payload}) => {
+      state. photos = payload
+    }
   },
 });
 
-export const { setBrands, setSelectedBrands, setModels } = cameraSlice.actions;
+export const { setBrands, setSelectedBrands, setModels, setSelectedModels, setPhotos } = cameraSlice.actions;
 
 export default cameraSlice
