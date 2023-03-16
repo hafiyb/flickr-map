@@ -35,7 +35,11 @@ export const flickrApi = createApi({
       },
     }),
     getPhotos: builder.query({
-      query: (model, page) => {
+      query: (object) => {
+        console.log(object)
+        let model = object.model
+        let page = object.page
+        console.log(model,page)
         let formData = new FormData()
         formData.append('api_key', key);
         formData.append('method', 'flickr.photos.search');

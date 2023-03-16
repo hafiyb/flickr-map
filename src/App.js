@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   clearModels,
+  clearPhotos,
   setBrands,
   setModels,
   setPhotos,
@@ -29,6 +30,7 @@ const App = () => {
   const dispatch = useDispatch();
 
   const [popupOpen, setPopupOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(true);
   const [mapCenter, setMapCenter] = useState({ lat: 3, lng: 102 });
 
   const defaultProps = {
@@ -97,8 +99,8 @@ const App = () => {
   }, [getPhotosData]);
 
   useEffect(() => {
-    console.log(photos);
-  }, [photos]);
+    dispatch(clearModels());
+  }, [selectedBrands]);
 
   const handleSelectBrand = (e) => {
     if (selectedBrands.includes(e)) {
@@ -107,6 +109,8 @@ const App = () => {
       dispatch(setSelectedBrands(temp));
     } else dispatch(setSelectedBrands([...selectedBrands, e]));
     dispatch(setSelectedModels([]));
+    dispatch(clearPhotos());
+    setPopupOpen(false);
   };
 
   const handleSelectModel = (e) => {
@@ -115,16 +119,14 @@ const App = () => {
       temp.splice(temp.indexOf(e), 1);
       dispatch(setSelectedModels(temp));
     } else dispatch(setSelectedModels([...selectedModels, e]));
+    dispatch(clearPhotos());
+    setPopupOpen(false);
   };
 
-  useEffect(() => {
-    dispatch(clearModels());
-  }, [selectedBrands]);
-
   const handleSearchPhotos = (page) => {
-    triggerGetPhotosQuery(selectedModels, page);
+    triggerGetPhotosQuery({ model: selectedModels, page: page });
     dispatch(setSelectedPhoto(-1));
-
+    setPopupOpen(false);
   };
 
   const handleChangePage = (mod) => {
@@ -138,15 +140,22 @@ const App = () => {
   };
 
   return (
-    <div class={'App'}>
-      <div class={'app-container'}>
-        <div class={'list-container'}>
-          <div class={'list-container-search'}>
-            <h3>flickr-map</h3>
+    <div className={'App'}>
+      <div className={'app-container'}>
+        <div
+          className={`list-container ${
+            listOpen ? 'list-container-is-visible' : 'list-container-is-hidden'
+          }`}
+        >
+          <div className={'list-container-search'}>
+            <div className={'list-container-title'}>
+              <h3>flickr-map</h3>
+              <Button className={'button-open-list-mobile'} onClick={() => setListOpen(false)}>{'<<'}</Button>
+            </div>
             <DropdownButton
               id='dropdown-variants-primary'
               title='Select Brands'
-              autoClose={false}
+              autoClose={'outside'}
               onSelect={(e) => handleSelectBrand(e)}
             >
               {brands?.map((item, i) => {
@@ -164,7 +173,7 @@ const App = () => {
             <DropdownButton
               id='dropdown-variants-primary'
               title='Select Model'
-              autoClose={false}
+              autoClose={'outside'}
               disabled={!selectedBrands.length}
               onSelect={(e) => handleSelectModel(e)}
             >
@@ -175,7 +184,7 @@ const App = () => {
                       <DropdownItem key={i} disabled>
                         {brand.brand}
                       </DropdownItem>
-                      <div class='dropdown-divider'></div>
+                      <div className='dropdown-divider'></div>
                       {brand.camera.map((item, i) => {
                         return (
                           <DropdownItem
@@ -203,7 +212,7 @@ const App = () => {
               Search
             </Button>
           </div>
-          <div class={'list-container-photos'}>
+          <div className={'list-container-photos'}>
             {!loadingPhotosData ? (
               photos.map((item, i) => {
                 return (
@@ -211,7 +220,11 @@ const App = () => {
                     props={item}
                     index={i}
                     handleSelectPhoto={() =>
-                      handleSelectPhoto(i, parseFloat(item.latitude), parseFloat(item.longitude))
+                      handleSelectPhoto(
+                        i,
+                        parseFloat(item.latitude),
+                        parseFloat(item.longitude)
+                      )
                     }
                   />
                 );
@@ -220,25 +233,25 @@ const App = () => {
               <p>loading...</p>
             )}
           </div>
-          <div class={'list-container-pagination'}>
+          <div className={'list-container-pagination'}>
             <nav aria-label='Page navigation example'>
-              <ul class={'pagination'}>
-                <li class={'page-item'}>
+              <ul className={'pagination'}>
+                <li className={'page-item'}>
                   <button
-                    class='page-link'
+                    className='page-link'
                     href='#'
-                    tabindex='-1'
+                    tabIndex='-1'
                     disabled={currentPage === 1}
                     onClick={() => handleChangePage(-1)}
                   >
                     {'<<'}
                   </button>
                 </li>
-                <li class={'page-item'}>
+                <li className={'page-item'}>
                   <button
-                    class='page-link'
+                    className='page-link'
                     href='#'
-                    tabindex='1'
+                    tabIndex='1'
                     disabled={currentPage >= maxPages}
                     onClick={() => handleChangePage(1)}
                   >
@@ -249,7 +262,15 @@ const App = () => {
             </nav>
           </div>
         </div>
-        <div class={'map-container'}>
+        <div
+          className={`map-container ${listOpen ? '' : 'map-container-is-full'}`}
+        >
+          <Button
+            className={'button-open-list'}
+            onClick={() => setListOpen(!listOpen)}
+          >
+            {listOpen ? '<<' : '>>'}
+          </Button>
           <PhotoPopup
             visible={popupOpen}
             setHidden={() => setPopupOpen(false)}

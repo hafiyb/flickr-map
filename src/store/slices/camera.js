@@ -41,6 +41,10 @@ export const cameraSlice = createSlice({
       state.maxPages = payload.pages;
       state.currentPage = payload.page;
     },
+    clearPhotos: (state, {payload}) => {
+      state.photos = []
+      state.selectedPhoto = {}
+    },
     setSelectedPhoto: (state, { payload }) => {
       state.selectedPhoto = { ...state.photos[payload], index: payload };
     },
@@ -55,6 +59,7 @@ export const {
   setPhotos,
   clearModels,
   setSelectedPhoto,
+  clearPhotos
 } = cameraSlice.actions;
 
 export default cameraSlice;

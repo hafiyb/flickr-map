@@ -5,7 +5,7 @@ const PhotoPopup = ({ visible, setHidden }) => {
 
   return (
     <div
-      class={`photo-popup-container ${visible ? 'is-visible' : 'is-hidden'}`}
+      className={`photo-popup-container ${visible ? 'is-visible' : 'is-hidden'}`}
     >
       <img
         src={`https://live.staticflickr.com/${selectedPhoto.server}/${selectedPhoto.id}_${selectedPhoto.secret}_b.jpg`}
