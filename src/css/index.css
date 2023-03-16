@@ -101,7 +101,7 @@
 }
 
 .list-container-photos {
-  background-color: #0000f8;
+  background-color: #9dd9f3;
   width: 100%;
   height: calc(100vh - 240px);
   overflow: auto;
@@ -157,7 +157,7 @@
 }
 
 .photo-list-item-selected {
-  background-color: #00007c;
+  background-color: #77c3ec;
 }
 
 .photo-map-thumbnail-container {
@@ -165,7 +165,7 @@
   max-width: 100px;
   height: auto;
   border-radius: 8px;
-  background-color: #0000f8;
+  background-color: #9dd9f3;
   cursor: pointer;
 }
 
