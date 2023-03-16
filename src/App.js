@@ -4,7 +4,7 @@ import {
   useLazyGetModelsQuery,
   useLazyGetPhotosQuery,
 } from './api';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   clearModels,
@@ -13,16 +13,32 @@ import {
   setPhotos,
   setSelectedBrands,
   setSelectedModels,
+  setSelectedPhoto,
 } from './store/slices/camera';
 import GoogleMapReact from 'google-map-react';
-import { Button, DropdownButton } from 'react-bootstrap';
+import { Button, DropdownButton, Modal } from 'react-bootstrap';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import PhotoListItem from './components/photoListItem';
+import PhotoMapThumbnail from './components/photoMapThumbnail';
+import PhotoModal from './components/photoPopup';
+import PhotoPopup from './components/photoPopup';
 
 const googleKey = process.env.REACT_APP_GOOGLEMAPS_API_KEY;
 
 const App = () => {
   const dispatch = useDispatch();
+
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [mapCenter, setMapCenter] = useState({ lat: 3, lng: 102 });
+
+  const defaultProps = {
+    center: {
+      lat: 3,
+      lng: 102,
+    },
+    zoom: 8,
+  };
+
   const brands = useSelector((state) => state.camera.brands, shallowEqual);
   const models = useSelector((state) => state.camera.models, shallowEqual);
   const fetchedModelBrands = useSelector(
@@ -38,6 +54,11 @@ const App = () => {
     (state) => state.camera.selectedModels,
     shallowEqual
   );
+  const currentPage = useSelector(
+    (state) => state.camera.currentPage,
+    shallowEqual
+  );
+  const maxPages = useSelector((state) => state.camera.maxPages, shallowEqual);
 
   const { data: getBrandsData } = useGetBrandsQuery();
   const [
@@ -62,12 +83,8 @@ const App = () => {
   }, [getModelsData]);
 
   useEffect(() => {
-    console.log(fetchedModelBrands);
-    console.log(selectedBrands);
     selectedBrands.forEach((item) => {
-      console.log(fetchedModelBrands.indexOf(item));
       if (!fetchedModelBrands.includes(item)) {
-        console.log(item, 'IS NOT FOUND');
         triggerGetModelsQuery(item);
       }
     });
@@ -75,21 +92,13 @@ const App = () => {
 
   useEffect(() => {
     if (getPhotosData && getPhotosData.stat === 'ok') {
-      dispatch(setPhotos([getPhotosData.photos.photo]));
+      dispatch(setPhotos(getPhotosData.photos));
     }
   }, [getPhotosData]);
 
   useEffect(() => {
     console.log(photos);
   }, [photos]);
-
-  const defaultProps = {
-    center: {
-      lat: 10.99835602,
-      lng: 77.01502627,
-    },
-    zoom: 11,
-  };
 
   const handleSelectBrand = (e) => {
     if (selectedBrands.includes(e)) {
@@ -112,8 +121,20 @@ const App = () => {
     dispatch(clearModels());
   }, [selectedBrands]);
 
-  const handleSearchPhotos = (e) => {
-    triggerGetPhotosQuery(e);
+  const handleSearchPhotos = (page) => {
+    triggerGetPhotosQuery(selectedModels, page);
+    dispatch(setSelectedPhoto(-1));
+
+  };
+
+  const handleChangePage = (mod) => {
+    handleSearchPhotos(currentPage + mod);
+  };
+
+  const handleSelectPhoto = (index, lat, lng) => {
+    dispatch(setSelectedPhoto(index));
+    setMapCenter({ lat: lat, lng: lng });
+    setPopupOpen(true);
   };
 
   return (
@@ -177,7 +198,7 @@ const App = () => {
             </DropdownButton>
             <Button
               disabled={!selectedBrands.length || !selectedModels.length}
-              onClick={() => handleSearchPhotos(selectedModels)}
+              onClick={() => handleSearchPhotos(1)}
             >
               Search
             </Button>
@@ -185,21 +206,74 @@ const App = () => {
           <div class={'list-container-photos'}>
             {!loadingPhotosData ? (
               photos.map((item, i) => {
-                return <PhotoListItem props={item}>i</PhotoListItem>;
+                return (
+                  <PhotoListItem
+                    props={item}
+                    index={i}
+                    handleSelectPhoto={() =>
+                      handleSelectPhoto(i, parseFloat(item.latitude), parseFloat(item.longitude))
+                    }
+                  />
+                );
               })
             ) : (
               <p>loading...</p>
             )}
           </div>
+          <div class={'list-container-pagination'}>
+            <nav aria-label='Page navigation example'>
+              <ul class={'pagination'}>
+                <li class={'page-item'}>
+                  <button
+                    class='page-link'
+                    href='#'
+                    tabindex='-1'
+                    disabled={currentPage === 1}
+                    onClick={() => handleChangePage(-1)}
+                  >
+                    {'<<'}
+                  </button>
+                </li>
+                <li class={'page-item'}>
+                  <button
+                    class='page-link'
+                    href='#'
+                    tabindex='1'
+                    disabled={currentPage >= maxPages}
+                    onClick={() => handleChangePage(1)}
+                  >
+                    {'>>'}
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
         <div class={'map-container'}>
+          <PhotoPopup
+            visible={popupOpen}
+            setHidden={() => setPopupOpen(false)}
+          />
           <GoogleMapReact
             bootstrapURLKeys={{
               key: googleKey,
             }}
             defaultCenter={defaultProps.center}
+            center={mapCenter}
             defaultZoom={defaultProps.zoom}
-          />
+            yesIWantToUseGoogleMapApiInternals
+          >
+            {photos.map((item, i) => {
+              return (
+                <PhotoMapThumbnail
+                  lat={item.latitude}
+                  lng={item.longitude}
+                  props={item}
+                  handleSelectPhoto={() => handleSelectPhoto(i)}
+                />
+              );
+            })}
+          </GoogleMapReact>
         </div>
       </div>
     </div>

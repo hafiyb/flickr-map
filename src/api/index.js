@@ -35,7 +35,7 @@ export const flickrApi = createApi({
       },
     }),
     getPhotos: builder.query({
-      query: (model) => {
+      query: (model, page) => {
         let formData = new FormData()
         formData.append('api_key', key);
         formData.append('method', 'flickr.photos.search');
@@ -44,9 +44,9 @@ export const flickrApi = createApi({
         formData.append('tags', model.toString());
         formData.append('has_geo', '1');
         formData.append('accuracy', '11');
-        formData.append('extras', 'geo');
+        formData.append('extras', 'geo, owner_name, date_taken');
         formData.append('per_page', '10');
-        formData.append('page', '1');
+        formData.append('page', page);
         formData.append('format', 'json');
         formData.append('nojsoncallback', '1');
 
